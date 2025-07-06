@@ -53,14 +53,18 @@
       box-shadow: 0 0 20px red;
       width: 150px;
     }
-    .logout {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background: #444;
-      padding: 0.5em 1em;
-      border-radius: 8px;
-      font-weight: bold;
+    .logout-btn {
+  position: fixed; /* Ganti absolute → fixed */
+  top: 10px;
+  left: 10px;
+  z-index: 9999; /* Lebih tinggi agar tidak tertutup */
+  background-color: red;
+  color: white;
+  padding: 5px 12px;
+  font-size: 13px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
     }
   </style>
 </head>
