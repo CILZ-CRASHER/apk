@@ -72,7 +72,7 @@
         return;
       }
 
-      const url = `http://46.101.32.52:2004/evolution?type=${type}&chatId=${number}@s.whatsapp.net`;
+      const url = `https://46.101.32.52:2004/evolution?type=${type}&chatId=${number}@s.whatsapp.net`;
       console.log("🔗 Mengirim ke:", url);
 
       try {
@@ -91,7 +91,7 @@
     async function cekStatus() {
       const status = document.getElementById("status");
       try {
-        const res = await fetch("http://46.101.32.52:2004/status");
+        const res = await fetch("https://46.101.32.52:2004/status");
         const text = await res.text();
         if (text.trim() === "true") {
           status.innerText = "🟢 STATUS: ONLINE";
